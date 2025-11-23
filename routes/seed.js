@@ -9,8 +9,8 @@ router.post('/run', async (req, res) => {
   try {
     console.log('Starting database seeding...');
 
-    // Create categories
-    const categories = await Category.bulkCreate([
+    // Check and create categories (skip if already exist)
+    const categoryData = [
       { name: 'Diapers', description: 'Quality diapers and changing essentials', sortOrder: 1, isActive: true },
       { name: 'Health', description: 'Health and wellness products', sortOrder: 2, isActive: true },
       { name: 'Feeding', description: 'Feeding bottles and mealtime essentials', sortOrder: 3, isActive: true },
@@ -20,12 +20,21 @@ router.post('/run', async (req, res) => {
       { name: 'Health & Safety', description: 'Safety products for babies', sortOrder: 7, isActive: true },
       { name: 'Bathtime', description: 'Bath essentials for babies', sortOrder: 8, isActive: true },
       { name: 'Klickmas Store', description: 'Special holiday items', sortOrder: 9, isActive: true }
-    ]);
+    ];
 
-    console.log('Categories created:', categories.length);
+    const categories = [];
+    for (const cat of categoryData) {
+      const [category] = await Category.findOrCreate({
+        where: { name: cat.name },
+        defaults: cat
+      });
+      categories.push(category);
+    }
 
-    // Create brands
-    const brands = await Brand.bulkCreate([
+    console.log('Categories ready:', categories.length);
+
+    // Check and create brands (skip if already exist)
+    const brandData = [
       { name: 'Pampers', description: 'Trusted baby care brand', isActive: true },
       { name: 'Huggies', description: 'Premium diapers and wipes', isActive: true },
       { name: 'Johnson & Johnson', description: 'Baby health and hygiene', isActive: true },
@@ -36,9 +45,18 @@ router.post('/run', async (req, res) => {
       { name: 'Tommee Tippee', description: 'Feeding essentials', isActive: true },
       { name: 'Medela', description: 'Breastfeeding products', isActive: true },
       { name: 'Graco', description: 'Baby gear and equipment', isActive: true }
-    ]);
+    ];
 
-    console.log('Brands created:', brands.length);
+    const brands = [];
+    for (const br of brandData) {
+      const [brand] = await Brand.findOrCreate({
+        where: { name: br.name },
+        defaults: br
+      });
+      brands.push(brand);
+    }
+
+    console.log('Brands ready:', brands.length);
 
     // Create sample products
     const products = [];
