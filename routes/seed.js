@@ -7,6 +7,8 @@ const { Category, Product, Brand } = db;
 // This endpoint should be protected or removed after seeding production
 router.post('/run', async (req, res) => {
   try {
+    // Set longer timeout for this endpoint
+    req.setTimeout(60000); // 60 seconds
     console.log('Starting database seeding...');
 
     // Check and create categories (skip if already exist)
