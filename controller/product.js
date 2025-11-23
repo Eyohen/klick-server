@@ -127,6 +127,7 @@ const getAll = async (req, res) => {
       }
     }
 
+    console.log('Fetching products with filters:', where);
     const products = await Product.findAndCountAll({
       where,
       include: includeArray,
@@ -134,6 +135,9 @@ const getAll = async (req, res) => {
       limit: parseInt(limit),
       offset: parseInt(offset)
     });
+
+    console.log('Products fetched:', products.rows.length);
+    console.log('Sending products response...');
 
     res.json({
       products: products.rows,
@@ -144,7 +148,11 @@ const getAll = async (req, res) => {
         pages: Math.ceil(products.count / limit)
       }
     });
+
+    console.log('Products response sent successfully');
   } catch (error) {
+    console.error('Error in getAll products:', error);
+    console.error('Error stack:', error.stack);
     res.status(500).json({ message: 'Failed to get products', error: error.message });
   }
 };

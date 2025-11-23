@@ -35,6 +35,7 @@ const create = async (req, res) => {
 
 const getAll = async (req, res) => {
   try {
+    console.log('Fetching categories...');
     const categories = await Category.findAll({
       where: { isActive: true },
       include: [
@@ -49,15 +50,25 @@ const getAll = async (req, res) => {
       order: [['sortOrder', 'ASC'], ['name', 'ASC']]
     });
 
-    // Add product count to each category
-    const categoriesWithCount = categories.map(category => ({
-      ...category.toJSON(),
-      productCount: category.products.length,
-      products: undefined // Remove the products array
-    }));
+    console.log('Categories fetched:', categories.length);
 
+    // Add product count to each category
+    const categoriesWithCount = categories.map(category => {
+      const categoryData = category.toJSON();
+      const productCount = categoryData.products ? categoryData.products.length : 0;
+      delete categoryData.products; // Properly remove the products array
+      return {
+        ...categoryData,
+        productCount
+      };
+    });
+
+    console.log('Sending categories response...');
     res.json({ categories: categoriesWithCount });
+    console.log('Categories response sent successfully');
   } catch (error) {
+    console.error('Error in getAll categories:', error);
+    console.error('Error stack:', error.stack);
     res.status(500).json({ message: 'Failed to get categories', error: error.message });
   }
 };

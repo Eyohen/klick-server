@@ -38,7 +38,7 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.get('/api/health', (req, res) => {
   res.status(200).json({ 
     status: 'OK', 
-    message: 'Protein Goodies API is running',
+    message: 'Klick-africa API is running',
     timestamp: new Date().toISOString()
   });
 });
