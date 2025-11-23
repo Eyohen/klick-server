@@ -27,7 +27,8 @@ const seedRoutes = require('./routes/seed');
 
 
 const app = express();
-const port = process.env.API_PORT || 9000;
+// Railway uses PORT, local uses API_PORT
+const port = process.env.PORT || process.env.API_PORT || 9000;
 app.use(cors());
 
 app.use(helmet());
@@ -74,7 +75,7 @@ app.use((err, req, res, next) => {
     message: 'Something went wrong!',
     error: process.env.NODE_ENV === 'development' ? err.message : undefined
   });
-  
+
 });
 
 // 404 handler
@@ -97,7 +98,7 @@ db.sequelize
     
     // Start server
     app.listen(port, () => {
-      console.log(`🚀 Protein Goodies API listening on port ${port}`);
+      console.log(`🚀 Klick- africa API listening on port ${port}`);
       console.log(`🌍 Health check: http://localhost:${port}/api/health`);
     });
   })
