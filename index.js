@@ -20,8 +20,9 @@ const reviewRoutes = require('./routes/review');
 const wishlistRoutes = require('./routes/wishlist');
 const analyticsRoutes = require('./routes/analytics');
 const userRoutes = require('./routes/user');
-const discountRoutes = require('./routes/discount'); 
+const discountRoutes = require('./routes/discount');
 const deliveryFeeRoutes = require('./routes/deliveryfee');
+const seedRoutes = require('./routes/seed');
 
 
 
@@ -62,8 +63,9 @@ app.use('/api/reviews', reviewRoutes);
 app.use('/api/wishlist', wishlistRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/user', userRoutes);
-app.use('/api/discounts', discountRoutes); 
+app.use('/api/discounts', discountRoutes);
 app.use('/api/delivery-fees', deliveryFeeRoutes);
+app.use('/api/seed', seedRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
@@ -85,13 +87,12 @@ db.sequelize
   .then(() => {
     console.log(`✅ Database connection established successfully... ${process.env.NODE_ENV}`);
 
-    // Database schema is managed via Sequelize migrations
-    // Run 'npm run migrate' to apply pending migrations
-    // Replaced: db.sequelize.sync({ alter: true })
-    return Promise.resolve();
+    // Sync database tables (creates tables if they don't exist)
+    // In production, use { alter: true } to update existing tables without dropping data
+    return db.sequelize.sync({ alter: true });
   })
   .then(() => {
-    console.log('✅ All models synchronized successfully');
+    console.log('✅ All models synchronized and tables created/updated successfully');
     
     // Start server
     app.listen(port, () => {
