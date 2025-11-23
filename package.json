@@ -4,7 +4,9 @@
   "description": "Backend for parents ecommerce platform",
   "main": "index.js",
   "scripts": {
+    "start": "node index.js",
     "dev": "nodemon index.js",
+    "build": "echo 'No build needed for Node.js backend'",
     "test": "echo \"Error: no test specified\" && exit 1",
     "migrate": "npx sequelize-cli db:migrate",
     "migrate:undo": "npx sequelize-cli db:migrate:undo",
