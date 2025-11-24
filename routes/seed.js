@@ -1,8 +1,9 @@
 // routes/seed.js
 const express = require('express');
 const router = express.Router();
+const bcrypt = require('bcrypt');
 const db = require('../models');
-const { Category, Product, Brand } = db;
+const { Category, Product, Brand, User, DeliveryFee } = db;
 
 // This endpoint should be protected or removed after seeding production
 router.post('/run', async (req, res) => {
@@ -76,7 +77,7 @@ router.post('/run', async (req, res) => {
         originalPrice: 10000,
         categoryId: diapersCategory.id,
         brandId: pampersBrand.id,
-        imageUrl: 'https://images.unsplash.com/photo-1584462853452-2a41e7a0465b?w=500&h=500&fit=crop',
+        imageUrl: 'https://images.unsplash.com/photo-1522771930-78848d9293e8?w=800&auto=format&fit=crop',
         stockQuantity: 50,
         sku: 'DIAPER-PAMPERS-001',
         isActive: true,
@@ -91,7 +92,7 @@ router.post('/run', async (req, res) => {
         originalPrice: 11000,
         categoryId: diapersCategory.id,
         brandId: huggiesBrand.id,
-        imageUrl: 'https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?w=500&h=500&fit=crop',
+        imageUrl: 'https://images.unsplash.com/photo-1587047336274-63dbe1e44d01?w=800&auto=format&fit=crop',
         stockQuantity: 45,
         sku: 'DIAPER-HUGGIES-001',
         isActive: true,
@@ -283,3 +284,121 @@ router.post('/run', async (req, res) => {
 });
 
 module.exports = router;
+
+// Admin setup endpoint - creates admin user and delivery fees
+router.post('/admin-setup', async (req, res) => {
+  try {
+    console.log('Starting admin setup...');
+
+    // Create admin user
+    const hashedPassword = await bcrypt.hash('admin123', 10);
+    
+    const [adminUser, created] = await User.findOrCreate({
+      where: { email: 'admin@klickafrica.com' },
+      defaults: {
+        firstName: 'Admin',
+        lastName: 'KlickAfrica',
+        email: 'admin@klickafrica.com',
+        password: hashedPassword,
+        phone: '08000000000',
+        isAdmin: true,
+        emailVerified: true,
+        isActive: true
+      }
+    });
+
+    console.log('Admin user:', created ? 'created' : 'already exists');
+
+    // Nigerian states with delivery fees
+    const deliveryFees = [
+      // South-West (Lagos axis - lower fees)
+      { state: 'Lagos', fee: 2500, zone: 'South-West', estimatedDays: 1 },
+      { state: 'Ogun', fee: 3000, zone: 'South-West', estimatedDays: 2 },
+      { state: 'Oyo', fee: 3500, zone: 'South-West', estimatedDays: 2 },
+      { state: 'Osun', fee: 4000, zone: 'South-West', estimatedDays: 3 },
+      { state: 'Ondo', fee: 4500, zone: 'South-West', estimatedDays: 3 },
+      { state: 'Ekiti', fee: 4500, zone: 'South-West', estimatedDays: 3 },
+
+      // South-South
+      { state: 'Rivers', fee: 4000, zone: 'South-South', estimatedDays: 3 },
+      { state: 'Delta', fee: 4000, zone: 'South-South', estimatedDays: 3 },
+      { state: 'Edo', fee: 4000, zone: 'South-South', estimatedDays: 3 },
+      { state: 'Akwa Ibom', fee: 4500, zone: 'South-South', estimatedDays: 4 },
+      { state: 'Cross River', fee: 4500, zone: 'South-South', estimatedDays: 4 },
+      { state: 'Bayelsa', fee: 5000, zone: 'South-South', estimatedDays: 4 },
+
+      // South-East
+      { state: 'Anambra', fee: 4000, zone: 'South-East', estimatedDays: 3 },
+      { state: 'Enugu', fee: 4000, zone: 'South-East', estimatedDays: 3 },
+      { state: 'Imo', fee: 4000, zone: 'South-East', estimatedDays: 3 },
+      { state: 'Abia', fee: 4000, zone: 'South-East', estimatedDays: 3 },
+      { state: 'Ebonyi', fee: 4500, zone: 'South-East', estimatedDays: 4 },
+
+      // North-Central
+      { state: 'FCT (Abuja)', fee: 3500, zone: 'North-Central', estimatedDays: 2 },
+      { state: 'Kwara', fee: 4000, zone: 'North-Central', estimatedDays: 3 },
+      { state: 'Kogi', fee: 4500, zone: 'North-Central', estimatedDays: 3 },
+      { state: 'Niger', fee: 4500, zone: 'North-Central', estimatedDays: 3 },
+      { state: 'Nasarawa', fee: 4000, zone: 'North-Central', estimatedDays: 3 },
+      { state: 'Plateau', fee: 4500, zone: 'North-Central', estimatedDays: 4 },
+      { state: 'Benue', fee: 4500, zone: 'North-Central', estimatedDays: 4 },
+
+      // North-West
+      { state: 'Kaduna', fee: 5000, zone: 'North-West', estimatedDays: 4 },
+      { state: 'Kano', fee: 5000, zone: 'North-West', estimatedDays: 4 },
+      { state: 'Katsina', fee: 5500, zone: 'North-West', estimatedDays: 5 },
+      { state: 'Sokoto', fee: 6000, zone: 'North-West', estimatedDays: 5 },
+      { state: 'Zamfara', fee: 6000, zone: 'North-West', estimatedDays: 5 },
+      { state: 'Kebbi', fee: 6000, zone: 'North-West', estimatedDays: 5 },
+      { state: 'Jigawa', fee: 5500, zone: 'North-West', estimatedDays: 5 },
+
+      // North-East
+      { state: 'Bauchi', fee: 5500, zone: 'North-East', estimatedDays: 5 },
+      { state: 'Gombe', fee: 5500, zone: 'North-East', estimatedDays: 5 },
+      { state: 'Borno', fee: 6500, zone: 'North-East', estimatedDays: 6 },
+      { state: 'Yobe', fee: 6500, zone: 'North-East', estimatedDays: 6 },
+      { state: 'Taraba', fee: 5500, zone: 'North-East', estimatedDays: 5 },
+      { state: 'Adamawa', fee: 5500, zone: 'North-East', estimatedDays: 5 }
+    ];
+
+    let createdCount = 0;
+    let existingCount = 0;
+
+    for (const feeData of deliveryFees) {
+      const [deliveryFee, wasCreated] = await DeliveryFee.findOrCreate({
+        where: { state: feeData.state },
+        defaults: feeData
+      });
+
+      if (wasCreated) {
+        createdCount++;
+      } else {
+        existingCount++;
+      }
+    }
+
+    console.log(`Delivery fees - Created: ${createdCount}, Existing: ${existingCount}`);
+
+    res.json({
+      message: 'Admin setup completed successfully!',
+      admin: {
+        email: 'admin@klickafrica.com',
+        password: 'admin123',
+        note: 'Please change this password after first login',
+        created: created
+      },
+      deliveryFees: {
+        total: deliveryFees.length,
+        created: createdCount,
+        existing: existingCount
+      }
+    });
+
+  } catch (error) {
+    console.error('Admin setup error:', error);
+    res.status(500).json({ 
+      message: 'Failed to setup admin', 
+      error: error.message 
+    });
+  }
+});
