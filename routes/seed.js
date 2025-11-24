@@ -290,16 +290,14 @@ router.post('/admin-setup', async (req, res) => {
   try {
     console.log('Starting admin setup...');
 
-    // Create admin user
-    const hashedPassword = await bcrypt.hash('admin123', 10);
-    
+    // Create or update admin user - password will be automatically hashed by the model hooks
     const [adminUser, created] = await User.findOrCreate({
       where: { email: 'admin@klickafrica.com' },
       defaults: {
         firstName: 'Admin',
         lastName: 'KlickAfrica',
         email: 'admin@klickafrica.com',
-        password: hashedPassword,
+        password: 'admin123',
         phone: '08000000000',
         isAdmin: true,
         emailVerified: true,
@@ -307,7 +305,13 @@ router.post('/admin-setup', async (req, res) => {
       }
     });
 
-    console.log('Admin user:', created ? 'created' : 'already exists');
+    // If user already existed, update the password to fix any double-hashing issues
+    if (!created) {
+      await adminUser.update({ password: 'admin123' });
+      console.log('Admin user: password updated');
+    } else {
+      console.log('Admin user: created');
+    }
 
     // Nigerian states with delivery fees
     const deliveryFees = [
